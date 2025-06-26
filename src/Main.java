@@ -22,8 +22,12 @@ public class Main {
     }
 
     private static void initializeCommands() {
+        commands.put(COMMAND.GET_BALANCE.name(), new GetBalanceCommand());
         commands.put(COMMAND.CASH_IN.name(), new CashInCommand());
         commands.put(COMMAND.LIST_BILL.name(), new ListBillCommand());
+        commands.put(COMMAND.CREATE_BILL.name(), new CreateBillCommand());
+        commands.put(COMMAND.UPDATE_BILL.name(), new UpdateBillCommand());
+        commands.put(COMMAND.DELETE_BILL.name(), new DeleteBillCommand());
         commands.put(COMMAND.PAY.name(), new PayCommand());
         commands.put(COMMAND.DUE_DATE.name(), new DueDateCommand());
         commands.put(COMMAND.SCHEDULE.name(), new ScheduleCommand());
@@ -63,8 +67,12 @@ public class Main {
 
     private static void printHelp() {
         System.out.println("Available commands:");
+        System.out.println("  GET_BALANCE <amount> - get your balance");
         System.out.println("  CASH_IN <amount> - Add funds to your balance");
         System.out.println("  LIST_BILL - List all bills");
+        System.out.println("  CREATE_BILL - Create a bill");
+        System.out.println("  UPDATE_BILL - Update a bill");
+        System.out.println("  UPDATE_BILL - DELETE a bill");
         System.out.println("  PAY <bill_id> - Pay a specific bill");
         System.out.println("  DUE_DATE - List bills with upcoming due dates");
         System.out.println("  SCHEDULE <bill_id> <dd/MM/yyyy> - Schedule a payment");
@@ -72,4 +80,5 @@ public class Main {
         System.out.println("  SEARCH_BILL_BY_PROVIDER <provider> - Search bills by provider");
         System.out.println("  EXIT - Exit the program");
     }
+
 }
