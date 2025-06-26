@@ -15,11 +15,13 @@ public class PayCommand implements Command{
 
     @Override
     public void execute(String[] args) {
-        try {
-            int billId = Integer.parseInt(args[0]);
-            paymentService.payBill(billId);
-        } catch (NumberFormatException e) {
-            LOG.info("Invalid bill ID format");
+        for (String arg : args) {
+            try {
+                int billId = Integer.parseInt(arg);
+                paymentService.payBill(billId);
+            } catch (NumberFormatException e) {
+                LOG.info("Invalid bill ID format: " + arg);
+            }
         }
     }
 }
