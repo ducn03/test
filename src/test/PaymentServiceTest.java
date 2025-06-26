@@ -1,5 +1,18 @@
 package test;
 
+import enums.PAYMENT;
+import model.Bill;
+import model.Customer;
+import model.Payment;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import service.BillService;
+import service.PaymentService;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class PaymentServiceTest {
     private BillService billService;
     private PaymentService paymentService;
@@ -7,21 +20,21 @@ public class PaymentServiceTest {
     @BeforeEach
     void setUp() {
         billService = new BillService();
-        paymentService = PaymentService.getInstance(billService);
+        paymentService = PaymentService.getInstance(Customer.getInstance(), billService);
         // Reset Customer balance and payments to avoid interference
         Customer.getInstance().addFunds(-Customer.getInstance().getBalance());
         paymentService.listPayments().clear();
     }
 
     @Test
-    void testSingletonInstance() {
-        PaymentService instance1 = PaymentService.getInstance(billService);
-        PaymentService instance2 = PaymentService.getInstance(billService);
+    public void testSingletonInstance() {
+        PaymentService instance1 = PaymentService.getInstance(Customer.getInstance(), billService);
+        PaymentService instance2 = PaymentService.getInstance(Customer.getInstance(), billService);
         assertSame(instance1, instance2, "getInstance() should return the same instance");
     }
 
     @Test
-    void testPayBillSuccess() {
+    public void testPayBillSuccess() {
         Customer.getInstance().addFunds(1000000L);
         boolean result = paymentService.payBill(1);
         assertTrue(result, "Payment should succeed with sufficient funds");
@@ -35,7 +48,7 @@ public class PaymentServiceTest {
     }
 
     @Test
-    void testPayBillInsufficientFunds() {
+    public void testPayBillInsufficientFunds() {
         Customer.getInstance().addFunds(100000L);
         boolean result = paymentService.payBill(1);
         assertFalse(result, "Payment should fail with insufficient funds");
@@ -46,7 +59,7 @@ public class PaymentServiceTest {
     }
 
     @Test
-    void testPayBillInvalidId() {
+    public void testPayBillInvalidId() {
         Customer.getInstance().addFunds(1000000L);
         boolean result = paymentService.payBill(999);
         assertFalse(result, "Payment should fail for invalid bill ID");
@@ -55,7 +68,7 @@ public class PaymentServiceTest {
     }
 
     @Test
-    void testPayBillAlreadyPaid() {
+    public void testPayBillAlreadyPaid() {
         Customer.getInstance().addFunds(1000000L);
         paymentService.payBill(1);
         boolean result = paymentService.payBill(1);
@@ -66,11 +79,11 @@ public class PaymentServiceTest {
     }
 
     @Test
-    void testListPaymentsSharedInstance() {
+    public void testListPaymentsSharedInstance() {
         Customer.getInstance().addFunds(1000000L);
-        PaymentService instance1 = PaymentService.getInstance(billService);
+        PaymentService instance1 = PaymentService.getInstance(Customer.getInstance(), billService);
         instance1.payBill(1);
-        PaymentService instance2 = PaymentService.getInstance(billService);
+        PaymentService instance2 = PaymentService.getInstance(Customer.getInstance(), billService);
         List<Payment> payments = instance2.listPayments();
         assertEquals(1, payments.size(), "Payments should be shared across instances");
         assertEquals(200000L, payments.get(0).getAmount(), "Payment amount should match");

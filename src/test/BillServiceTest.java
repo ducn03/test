@@ -1,5 +1,18 @@
 package test;
 
+import enums.PAYMENT;
+import model.Bill;
+import model.Customer;
+import model.Payment;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import service.BillService;
+import service.PaymentService;
+
+import java.util.List;
+
+import static org.junit.Assert.*;
+
 public class BillServiceTest {
     private BillService billService;
     private PaymentService paymentService;
@@ -7,14 +20,14 @@ public class BillServiceTest {
     @BeforeEach
     void setUp() {
         billService = new BillService();
-        paymentService = PaymentService.getInstance(billService);
+        paymentService = PaymentService.getInstance(Customer.getInstance(), billService);
         // Reset Customer balance and payments to avoid interference
         Customer.getInstance().addFunds(-Customer.getInstance().getBalance());
         paymentService.listPayments().clear();
     }
 
     @Test
-    void testSampleBillsInitialized() {
+    public void testSampleBillsInitialized() {
         List<Bill> bills = billService.listBills();
         assertEquals(3, bills.size());
         assertEquals(1, bills.get(0).getId());
@@ -32,13 +45,13 @@ public class BillServiceTest {
     }
 
     @Test
-    void testDeleteBill() {
+    public void testDeleteBill() {
         billService.deleteBill(1);
         assertEquals(2, billService.listBills().size());
     }
 
     @Test
-    void testSearchBillsByProvider() {
+    public void testSearchBillsByProvider() {
         List<Bill> result = billService.searchBillsByProvider("VNPT");
         assertEquals(1, result.size());
         assertEquals("VNPT", result.get(0).getProvider());
@@ -46,7 +59,7 @@ public class BillServiceTest {
     }
 
     @Test
-    void testGetDueBills() {
+    public void testGetDueBills() {
         List<Bill> dueBills = billService.getDueBills();
         assertEquals(3, dueBills.size());
         assertEquals(1, dueBills.get(0).getId());
@@ -55,7 +68,7 @@ public class BillServiceTest {
     }
 
     @Test
-    void testGetBillById() {
+    public void testGetBillById() {
         Bill bill = billService.getBillById(1);
         assertNotNull(bill);
         assertEquals("ELECTRIC", bill.getType());
@@ -64,27 +77,27 @@ public class BillServiceTest {
     }
 
     @Test
-    void testPayBillIntegration() {
+    public void testPayBillIntegration() {
         Customer.getInstance().addFunds(1000000L);
-        assertEquals(1000000L, Customer.getInstance().getBalance(), "Balance should be updated after adding funds");
+        assertEquals(String.valueOf(1000000L), Customer.getInstance().getBalance(), "Balance should be updated after adding funds");
 
         boolean result = paymentService.payBill(1);
-        assertTrue(result, "Payment should succeed with sufficient funds");
-        assertEquals(800000L, Customer.getInstance().getBalance(), "Balance should be reduced after payment");
+        assertTrue("Payment should succeed with sufficient funds", result);
+        assertEquals(String.valueOf(800000L), Customer.getInstance().getBalance(), "Balance should be reduced after payment");
         Bill bill = billService.getBillById(1);
         assertEquals(PAYMENT.PAID.name(), bill.getState(), "Bill should be marked as PAID");
 
         List<Payment> payments = paymentService.listPayments();
-        assertEquals(1, payments.size(), "Payment should be recorded");
-        assertEquals(200000L, payments.get(0).getAmount(), "Payment amount should match bill amount");
+        assertEquals(String.valueOf(1), payments.size(), "Payment should be recorded");
+        assertEquals(String.valueOf(200000L), payments.get(0).getAmount(), "Payment amount should match bill amount");
     }
 
     @Test
-    void testPayBillInsufficientFunds() {
+    public void testPayBillInsufficientFunds() {
         Customer.getInstance().addFunds(100000L);
         boolean result = paymentService.payBill(1);
-        assertFalse(result, "Payment should fail with insufficient funds");
-        assertEquals(100000L, Customer.getInstance().getBalance(), "Balance should remain unchanged");
+        assertFalse("Payment should fail with insufficient funds", result);
+        assertEquals(String.valueOf(100000L), Customer.getInstance().getBalance(), "Balance should remain unchanged");
         Bill bill = billService.getBillById(1);
         assertEquals(PAYMENT.NOT_PAID.name(), bill.getState(), "Bill should remain NOT_PAID");
     }
